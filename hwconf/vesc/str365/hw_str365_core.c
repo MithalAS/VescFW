@@ -88,14 +88,16 @@ static lbm_value ext_sw_hv(lbm_value *args, lbm_uint argn) {
 	return ENC_SYM_TRUE;
 }
 
-static void load_extensions(void) {
-	lbm_add_extension("hw-reg-adj", ext_reg_adj);
-	lbm_add_extension("hw-reg-en", ext_reg_en);
-	lbm_add_extension("hw-reg-v", ext_reg_v);
-	lbm_add_extension("hw-reg-i", ext_reg_i);
-	lbm_add_extension("hw-reg-t", ext_reg_t);
-	lbm_add_extension("hw-reg5-v", ext_reg5_v);
-	lbm_add_extension("hw-sw-hv", ext_sw_hv);
+static void load_extensions(bool main_found) {
+	if (!main_found) {
+		lbm_add_extension("hw-reg-adj", ext_reg_adj);
+		lbm_add_extension("hw-reg-en", ext_reg_en);
+		lbm_add_extension("hw-reg-v", ext_reg_v);
+		lbm_add_extension("hw-reg-i", ext_reg_i);
+		lbm_add_extension("hw-reg-t", ext_reg_t);
+		lbm_add_extension("hw-reg5-v", ext_reg5_v);
+		lbm_add_extension("hw-sw-hv", ext_sw_hv);
+	}
 }
 
 void hw_init_gpio(void) {
@@ -151,9 +153,9 @@ void hw_init_gpio(void) {
 
 	// AUX pin
 	AUX_OFF();
-	palSetPadMode(AUX_GPIO, AUX_PIN,
-			PAL_MODE_OUTPUT_PUSHPULL |
-			PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(AUX_GPIO, AUX_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+	AUX2_OFF();
+	palSetPadMode(AUX2_GPIO, AUX2_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 
 	// ADC Pins
 	palSetPadMode(GPIOA, 0, PAL_MODE_INPUT_ANALOG);
