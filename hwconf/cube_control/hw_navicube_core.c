@@ -42,10 +42,16 @@ void hw_init_gpio(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOH, ENABLE);
-
+	
 	// LEDs
-	palSetPadMode(GPIOB, 0, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
-	palSetPadMode(GPIOB, 1, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(LED_GREEN_GPIO, LED_GREEN_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(LED_GREEN_GPIO, LED_RED_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+
+	// Phase filters
+	palSetPadMode(GPIOC, 2, PAL_MODE_OUTPUT_OPENDRAIN | PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(GPIOC, 14, PAL_MODE_OUTPUT_OPENDRAIN | PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(GPIOC, 15, PAL_MODE_OUTPUT_OPENDRAIN | PAL_STM32_OSPEED_HIGHEST);
+	PHASE_FILTER_OFF();
 
 	// GPIOA Configuration: Channel 1 to 3 as alternate function push-pull
 	palSetPadMode(GPIOA, 8, PAL_MODE_ALTERNATE(GPIO_AF_TIM1) |
@@ -73,11 +79,6 @@ void hw_init_gpio(void) {
 	palSetPadMode(HW_HALL_ENC_GPIO2, HW_HALL_ENC_PIN2, PAL_MODE_INPUT_PULLUP);
 	palSetPadMode(HW_HALL_ENC_GPIO3, HW_HALL_ENC_PIN3, PAL_MODE_INPUT_PULLUP);
 	
-	// Phase filters
-	palSetPadMode(GPIOC, 2, PAL_MODE_OUTPUT_OPENDRAIN | PAL_STM32_OSPEED_HIGHEST);
-	palSetPadMode(GPIOC, 14, PAL_MODE_OUTPUT_OPENDRAIN | PAL_STM32_OSPEED_HIGHEST);
-	palSetPadMode(GPIOC, 15, PAL_MODE_OUTPUT_OPENDRAIN | PAL_STM32_OSPEED_HIGHEST);
-	PHASE_FILTER_OFF();
 
 	// ADC Pins
 	palSetPadMode(GPIOA, 0, PAL_MODE_INPUT_ANALOG);
@@ -96,15 +97,15 @@ void hw_init_gpio(void) {
 
 void hw_setup_adc_channels(void) {
 	// ADC1 regular channels
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_15Cycles);          // 0 -  ADC_IND_CURR2
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 2, ADC_SampleTime_15Cycles);	         // 3 -  ADC_IND_SENS3	
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 3, ADC_SampleTime_15Cycles);          // 6 -  ADC_IND_CURR2
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 4, ADC_SampleTime_15Cycles);          // 9 -  ADC_IND_CURR2
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 5, ADC_SampleTime_15Cycles);          // 12 -  ADC_IND_CURR2
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 6, ADC_SampleTime_15Cycles);          // 15 -  ADC_IND_CURR2
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 7, ADC_SampleTime_15Cycles);          // 18 -  ADC_IND_CURR2	
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 8, ADC_SampleTime_15Cycles);	         // 21 -  ADC_IND_SENS3	
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 9, ADC_SampleTime_15Cycles);           // 24 -  ADC_IND_EXT	
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 		1, 	ADC_SampleTime_15Cycles);          // 0 -  ADC_IND_CURR2
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 		2, 	ADC_SampleTime_15Cycles);	         // 3 -  ADC_IND_SENS3	
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 		3, 	ADC_SampleTime_15Cycles);          // 6 -  ADC_IND_CURR2
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 		4, 	ADC_SampleTime_15Cycles);          // 9 -  ADC_IND_CURR2
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 		5, 	ADC_SampleTime_15Cycles);          // 12 -  ADC_IND_CURR2
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 		6, 	ADC_SampleTime_15Cycles);          // 15 -  ADC_IND_CURR2
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 		7, 	ADC_SampleTime_15Cycles);          // 18 -  ADC_IND_CURR2	
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 		8, 	ADC_SampleTime_15Cycles);	         // 21 -  ADC_IND_SENS3	
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 		9, 	ADC_SampleTime_15Cycles);           // 24 -  ADC_IND_EXT	
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_Vrefint, 10, ADC_SampleTime_56Cycles);    // 27 - ADC_IND_VREFINT     
 	
 	
@@ -233,5 +234,29 @@ void hw_try_restore_i2c(void) {
 		i2cStart(&HW_I2C_DEV, &i2cfg);
 
 		i2cReleaseBus(&HW_I2C_DEV);
+	}
+}
+
+float hw_navicube_get_adc_v_l1() {
+	if (mc_interface_get_configuration()->motor_type == MOTOR_TYPE_FOC) {
+		return ((ADC_Value[ADC_IND_SENS1] + ADC_Value[ADC_IND_SENS1_2]) / 2.0);
+	} else {
+		return ADC_Value[ADC_IND_SENS1];
+	}
+}
+
+float hw_navicube_get_adc_v_l2() {
+	if (mc_interface_get_configuration()->motor_type == MOTOR_TYPE_FOC) {
+		return ((ADC_Value[ADC_IND_SENS2] + ADC_Value[ADC_IND_SENS2_2]) / 2.0);
+	} else {
+		return ADC_Value[ADC_IND_SENS2];
+	}
+}
+
+float hw_navicube_get_adc_v_l3() {
+	if (mc_interface_get_configuration()->motor_type == MOTOR_TYPE_FOC) {
+		return ((ADC_Value[ADC_IND_SENS3] + ADC_Value[ADC_IND_SENS3_2]) / 2.0);
+	} else {
+		return ADC_Value[ADC_IND_SENS3];
 	}
 }

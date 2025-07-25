@@ -52,6 +52,7 @@ package_dict["HD60"] = [['hd60', default_name],
                     ['hd60_no_limits', no_limits_name]]
 package_dict["HD75"] = [['hd75', default_name],
                     ['hd75_no_limits', no_limits_name]]
+package_dict["NAVICUBE"] = [['navicube', default_name]]
 package_dict["A50S_6S"] = [['a50s_v22_6s', default_name]]
 package_dict["A50S_6S_HG"] = [['a50s_v22_6s_hg', default_name]]
 package_dict["A50S_12S"] = [['a50s_v22_12s', default_name]]

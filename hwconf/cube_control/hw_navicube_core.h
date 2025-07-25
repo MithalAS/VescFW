@@ -182,9 +182,9 @@
 #define HW_ICU_PIN					6
 
 // Measurement macros
-#define ADC_V_L1				ADC_Value[ADC_IND_SENS1]
-#define ADC_V_L2				ADC_Value[ADC_IND_SENS2]
-#define ADC_V_L3				ADC_Value[ADC_IND_SENS3]
+#define ADC_V_L1					hw_navicube_get_adc_v_l1()
+#define ADC_V_L2					hw_navicube_get_adc_v_l2()
+#define ADC_V_L3					hw_navicube_get_adc_v_l3()
 #define ADC_V_ZERO					(ADC_Value[ADC_IND_VIN_SENS] / 2)
 
 // Macros
@@ -216,22 +216,22 @@
 #endif
 
 #ifndef MCCONF_L_MAX_ABS_CURRENT
-#define MCCONF_L_MAX_ABS_CURRENT	250.0	// The maximum absolute current above which a fault is generated
+#define MCCONF_L_MAX_ABS_CURRENT	300.0	// The maximum absolute current above which a fault is generated
 #endif
 #ifndef MCCONF_FOC_SAMPLE_V0_V7
 #define MCCONF_FOC_SAMPLE_V0_V7		false	// Run control loop in both v0 and v7 (requires phase shunts)
 #endif
 #ifndef MCCONF_L_CURRENT_MAX
-#define MCCONF_L_CURRENT_MAX		80.0   // Current limit in Amperes (Upper)
+#define MCCONF_L_CURRENT_MAX		100.0   // Current limit in Amperes (Upper)
 #endif
 #ifndef MCCONF_L_CURRENT_MIN
-#define MCCONF_L_CURRENT_MIN		-70.0	// Current limit in Amperes (Lower)
+#define MCCONF_L_CURRENT_MIN		-100.0	// Current limit in Amperes (Lower)
 #endif
 #ifndef MCCONF_L_IN_CURRENT_MAX
-#define MCCONF_L_IN_CURRENT_MAX		80.0	// Input current limit in Amperes (Upper)
+#define MCCONF_L_IN_CURRENT_MAX		100.0	// Input current limit in Amperes (Upper)
 #endif
 #ifndef MCCONF_L_IN_CURRENT_MIN
-#define MCCONF_L_IN_CURRENT_MIN		-70.0	// Input current limit in Amperes (Lower)
+#define MCCONF_L_IN_CURRENT_MIN		-100.0	// Input current limit in Amperes (Lower)
 #endif
 
 // Defaults for BLDC
@@ -249,14 +249,18 @@
 #endif
 
 // Setting limits
-#define HW_LIM_CURRENT				-100.0, 100.0 
-#define HW_LIM_CURRENT_IN			-70.0, 70.0
-#define HW_LIM_CURRENT_ABS			0.0, 250.0
+#define HW_LIM_CURRENT				-300.0, 300.0 
+#define HW_LIM_CURRENT_IN			-100.0, 100.0
+#define HW_LIM_CURRENT_ABS			0.0, 350.0
 #define HW_LIM_ERPM					-200e3, 200e3
 #define HW_LIM_DUTY_MIN				0.0, 0.1
 #define HW_LIM_DUTY_MAX				0.0, 0.98	
 #define HW_LIM_TEMP_FET				-40.0, 100.0
 #define HW_LIM_VIN					4.0, 28.0
 #define MCCONF_L_MAX_VOLTAGE		26	// Maximum input voltage
+
+float hw_navicube_get_adc_v_l1(void);
+float hw_navicube_get_adc_v_l2(void);
+float hw_navicube_get_adc_v_l3(void);
 
 #endif /* HW_NAVICUBE_CORE_H_ */
