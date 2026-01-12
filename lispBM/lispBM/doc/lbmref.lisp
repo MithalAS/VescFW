@@ -384,7 +384,7 @@
 			"Any extensions to the local environment performed by an expression in the sequence is only visible within that expression itself."
 			))
 	    (bullet (list "**let**: `(let ((s1 e1) (s2 e2) ... (sN eN) e)` eI are evaluated in order into `vI`. The local environment is extended with `(sI . vI)`. `sI` is visible in `eJ` for `J >= I`. `e` is then evaluated in the extended local environment."
-			  "**setq**: `(setq s e)` is evaluated by first evaluating `e` into `v`. The environments are then scanned for a bining of `s`. local environment is searched first followed by global. If a binding of `s` is found it is modified into `(s . v)`."
+			  "**setq**: `(setq s e)` is evaluated by first evaluating `e` into `v`. The environments are then scanned for a binding of `s`. local environment is searched first followed by global. If a binding of `s` is found it is modified into `(s . v)`."
 			  ))
 	    (para (list "If no binding of `s` is found when evaluating `(setq s e)` a `variable_not_bound` error is triggered."
 			))
@@ -471,11 +471,11 @@
                         "file formats. Apparently [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format)"
                         "uses S-expressions as well to describe WebAssembly modules"
                         ))
-            (newline)
+            'newline
             (para (list "S-expressions are built from two things, **Atoms** and **Pairs** of S-expressions."
                         "So an S-expression is either:"
                         ))
-            (newline)
+            'newline
             (bullet (list " An **Atom** *a* "
                           " A **Pair** *a*,*b* of S-expressions `(a . b)` "
                           ))
@@ -1014,9 +1014,6 @@
               (code '((read-eval "'(+ 1 2)")
                       (read-eval "(eval '(+ 1 2))")
                       (read-eval "'kurt")
-                      (quote (+ 1 2))
-                      (eval (quote (+ 1 2)))
-                      (quote kurt)
                       ))
               end)))
 
@@ -1176,9 +1173,7 @@
                           "A `program-expr` is a list of expressions where each element in the list"
                           "can be evaluated by `eval`."
                           ))
-              (para (list "An optional environment can be passed in as the first argument:"
-                          "`(eval-program env-expr program-expr)`."
-                          ))
+              (para (list "Note that eval-program can not take any extra environment argument."))
               (code '((eval-program (list (list + 1 2) (list + 3 4)))
                       (eval-program '( (+ 1 2) (+ 3 4)))
                       (eval-program (list (list define 'a 10) (list + 'a 1)))
@@ -1410,7 +1405,7 @@
                           "Functions that make use of `rest-args` must, however, be written specifically to do so and"
                           "are themself responsible for the figuring out the positional semantics of extra arguments."
                           ))
-              (para (list "One was to explicitly carry the semantics of an optional argument into the function body"
+              (para (list "One way to explicitly carry the semantics of an optional argument into the function body"
                           "is to add optional arguments as key-value pairs where the key states the meaning."
                           "Then `rest-args` becomes essentially an association list that you query using `assoc`."
                           "For example:"
@@ -2764,7 +2759,7 @@
             mp-send
             mp-recv
             mp-recv-to
-            mp-set-mailbox-size
+            ;;mp-set-mailbox-size
             )
            ))
 
@@ -3132,10 +3127,10 @@
                           (move-to-flash ls)
                           ls
                           )
-                         (( defun f (x) (+ x 1))
-                          (move-to-flash f)
-                          (f 10)
-                          )
+                         ;(( defun f (x) (+ x 1))
+                         ; (move-to-flash f)
+                         ; (f 10)
+                         ; )
                          ))
               end)))
 
@@ -3159,7 +3154,7 @@
 
 (define type-convertions
   (section 2 "Type convertions"
-           (list
+           (list 
             (ref-entry "to-byte"
                        (list
                         (para (list "Convert any numerical value to a byte."

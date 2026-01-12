@@ -32,6 +32,7 @@
 #define HW_HAS_3_SHUNTS
 #define INVERTED_SHUNT_POLARITY
 #define HW_HAS_PHASE_FILTERS
+#define HW_BOOT_VESC_CAN
 
 // Macros
 #define LED_GREEN_GPIO			GPIOC
@@ -93,7 +94,11 @@
 
 // Hold shutdown pin early to wake up on short pulses
 #define HW_EARLY_INIT()			palSetPadMode(HW_SHUTDOWN_GPIO, HW_SHUTDOWN_PIN, PAL_MODE_OUTPUT_PUSHPULL); \
-								HW_SHUTDOWN_HOLD_ON();
+								palSetPadMode(AUX_GPIO, AUX_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST); \
+								palSetPadMode(AUX2_GPIO, AUX2_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST); \
+								HW_SHUTDOWN_HOLD_ON(); \
+								AUX_OFF(); \
+								AUX2_OFF();
 
 #define MCPWM_FOC_CURRENT_SAMP_OFFSET				(2) // Offset from timer top for ADC samples
 
@@ -112,14 +117,13 @@
 #define ADC_IND_SENS1			3
 #define ADC_IND_SENS2			4
 #define ADC_IND_SENS3			5
-#define ADC_IND_VIN_SENS		11
+#define ADC_IND_VIN_SENS		8
 #define ADC_IND_EXT5			16
 #define ADC_IND_EXT				6
 #define ADC_IND_EXT2			7
-#define ADC_IND_EXT3			8
-#define ADC_IND_VREFINT			12
+#define ADC_IND_EXT3			14
 #define ADC_IND_ADC_MUX			15
-#define ADC_IND_EXT4			9
+#define ADC_IND_EXT4			12
 #define ADC_IND_SHUTDOWN		13
 #define ADC_IND_EXT6			13
 

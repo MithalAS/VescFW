@@ -21,10 +21,10 @@
 #define CONF_GENERAL_H_
 
 // Firmware version
-#define FW_VERSION_MAJOR			6
-#define FW_VERSION_MINOR			06
+#define FW_VERSION_MAJOR			7
+#define FW_VERSION_MINOR			00
 // Set to 0 for building a release and iterate during beta test builds
-#define FW_TEST_VERSION_NUMBER		4
+#define FW_TEST_VERSION_NUMBER		1
 
 #include "datatypes.h"
 
@@ -169,6 +169,52 @@
 // Global configuration variables
 extern bool conf_general_permanent_nrf_found;
 extern volatile backup_data g_backup;
+
+// FOC Profiling
+#define FOC_PROFILE_EN
+
+#ifdef FOC_PROFILE_EN
+
+//#define FOC_PROFILE_LOCATIONS 50
+#define FOC_PROFILE_LOCATIONS 10
+
+//#define FOC_PROFILE_LINE_FINE() FOC_PROFILE_LINE()
+#define FOC_PROFILE_LINE_FINE()
+
+typedef struct {
+	uint32_t t_start;
+	bool running;
+	bool trigger_start;
+	int ind;
+	int line[FOC_PROFILE_LOCATIONS];
+	uint32_t time[FOC_PROFILE_LOCATIONS];
+} foc_profile;
+
+extern foc_profile g_foc_profile;
+
+#define FOC_PROFILE_TRIGGER() g_foc_profile.trigger_start = true;
+
+#define FOC_PROFILE_BEGIN() \
+		g_foc_profile.running = false; \
+		if (g_foc_profile.trigger_start && !is_v7) { \
+			g_foc_profile.t_start = timer_time_now(); \
+			g_foc_profile.running = true; \
+			g_foc_profile.trigger_start = false; \
+			g_foc_profile.ind = 0; \
+		}
+
+#define FOC_PROFILE_LINE() \
+		if (g_foc_profile.running) { \
+			g_foc_profile.line[g_foc_profile.ind] = __LINE__; \
+			g_foc_profile.time[g_foc_profile.ind++] = timer_time_now(); \
+		}
+
+#else
+#define FOC_PROFILE_TRIGGER()
+#define FOC_PROFILE_BEGIN()
+#define FOC_PROFILE_LINE()
+#define FOC_PROFILE_LINE_FINE()
+#endif
 
 // Functions
 void conf_general_init(void);

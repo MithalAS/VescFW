@@ -37,7 +37,7 @@
 #define LBM_MEMORY_BITMAP_SIZE_28K LBM_MEMORY_BITMAP_SIZE(448)
 
 #ifndef EXTENSION_STORAGE_SIZE
-#define EXTENSION_STORAGE_SIZE		306
+#define EXTENSION_STORAGE_SIZE		313
 #endif
 
 #ifndef ADC_SAMPLE_MAX_LEN
@@ -59,12 +59,7 @@ __attribute__((section(".ram4"))) static lbm_extension_t extension_storage[EXTEN
 __attribute__((section(".ram4"))) static lbm_prof_t prof_data[PROF_DATA_NUM];
 static volatile bool prof_running = false;
 
-static lbm_string_channel_state_t string_tok_state;
-static lbm_char_channel_t string_tok;
-static lbm_buffered_channel_state_t buffered_tok_state;
-static lbm_char_channel_t buffered_string_tok;
 static bool string_tok_valid = false;
-
 static volatile lbm_uint *image_ptr = 0;
 static int image_max_ind = 0;
 
@@ -83,7 +78,6 @@ static int restart_cnt = 0;
 static volatile bool const_write_error = false;
 
 // Private functions
-static uint32_t timestamp_callback(void);
 static void sleep_callback(uint32_t us);
 static bool image_write(uint32_t w, int32_t ix, bool const_heap);
 
@@ -459,6 +453,9 @@ void lispif_process_cmd(unsigned char *data, unsigned int len,
 				lbm_set_verbose(verbose_now);
 				commands_printf_lisp("Verbose errors %s", verbose_now ? "Enabled" : "Disabled");
 			} else {
+				static lbm_string_channel_state_t string_tok_state;
+				static lbm_char_channel_t string_tok;
+
 				if (repl_buffer) {
 					lispif_unlock_lbm();
 					break;
@@ -493,6 +490,9 @@ void lispif_process_cmd(unsigned char *data, unsigned int len,
 	} break;
 
 	case COMM_LISP_STREAM_CODE: {
+		static lbm_buffered_channel_state_t buffered_tok_state;
+		static lbm_char_channel_t buffered_string_tok;
+
 		int32_t ind = 0;
 		int32_t offset = buffer_get_int32(data, &ind);
 		int32_t tot_len = buffer_get_int32(data, &ind);
@@ -692,6 +692,9 @@ void lispif_stop(void) {
 }
 
 bool lispif_restart(bool print, bool load_code, bool load_imports) {
+	static lbm_string_channel_state_t string_tok_state;
+	static lbm_char_channel_t string_tok;
+
 	bool res = false;
 
 	restart_cnt++;
@@ -737,7 +740,6 @@ bool lispif_restart(bool print, bool load_code, bool load_imports) {
 				PRINT_STACK_SIZE, extension_storage,
 				EXTENSION_STORAGE_SIZE);
 
-		lbm_set_timestamp_us_callback(timestamp_callback);
 		lbm_set_usleep_callback(sleep_callback);
 		lbm_set_printf_callback(commands_printf_lisp);
 		lbm_set_ctx_done_callback(done_callback);
@@ -865,11 +867,6 @@ bool lispif_is_eval_task(void) {
 
 lbm_uint lispif_const_heap_max_ind(void)  {
 	return image_max_ind;
-}
-
-static uint32_t timestamp_callback(void) {
-	systime_t t = chVTGetSystemTimeX();
-	return (uint32_t) ((1000000 / CH_CFG_ST_FREQUENCY) * t);
 }
 
 static void sleep_callback(uint32_t us) {
